@@ -4,8 +4,10 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.SurfaceControl;
 
@@ -136,6 +138,11 @@ public class DisableFlagSecure extends XposedModule {
             hookOplus(classLoader);
         } catch (Throwable ignored) {
 
+        }
+
+        // Remove FLAG_SLIPPERY for Android 12+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            removeFlagSlippery();
         }
     }
 
@@ -439,6 +446,16 @@ public class DisableFlagSecure extends XposedModule {
                     .setCancelable(false)
                     .setPositiveButton("OK", (dialog, which) -> System.exit(0))
                     .show();
+        }
+    }
+
+    private void removeFlagSlippery() {
+        try {
+            ContentResolver contentResolver = getContext().getContentResolver();
+            Settings.Global.putInt(contentResolver, "flag_slippery", 0);
+            log("FLAG_SLIPPERY removed");
+        } catch (Exception e) {
+            log("Failed to remove FLAG_SLIPPERY", e);
         }
     }
 }
