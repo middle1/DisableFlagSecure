@@ -451,7 +451,7 @@ public class DisableFlagSecure extends XposedModule {
 
     private void removeFlagSlippery() {
         try {
-            ContentResolver contentResolver = getContext().getContentResolver();
+            ContentResolver contentResolver = XposedHelpers.callStaticMethod(android.app.ActivityThread.class, "currentApplication").getContentResolver();
             Settings.Global.putInt(contentResolver, "flag_slippery", 0);
             log("FLAG_SLIPPERY removed");
         } catch (Exception e) {
