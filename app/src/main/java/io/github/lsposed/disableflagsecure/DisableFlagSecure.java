@@ -468,7 +468,7 @@ public class DisableFlagSecure extends XposedModule {
         public static void before(@NonNull BeforeHookCallback callback) {
             int flags = (int) callback.getArgs()[0];
             int mask = (int) callback.getArgs()[1];
-
+            module.log("set flag hooked");
             if ((flags & FLAG_SLIPPERY) != 0) {
                 module.log("FLAG_SLIPPERY detected, removing it");
                 flags &= ~FLAG_SLIPPERY;
