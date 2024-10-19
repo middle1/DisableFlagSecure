@@ -31,6 +31,8 @@ public class DisableFlagSecure extends XposedModule {
     private static final String FLYME_SYSTEMUIEX = "com.flyme.systemuiex";
     private static final String MIUI_SCREENSHOT = "com.miui.screenshot";
 
+    private static final int FLAG_SLIPPERY = 0x00000040; // Определите константу FLAG_SLIPPERY
+
     private static XposedModule module;
 
     public DisableFlagSecure(XposedInterface base, ModuleLoadedParam param) {
@@ -467,9 +469,9 @@ public class DisableFlagSecure extends XposedModule {
             int flags = (int) callback.getArgs()[0];
             int mask = (int) callback.getArgs()[1];
 
-            if ((flags & android.view.WindowManager.LayoutParams.FLAG_SLIPPERY) != 0) {
+            if ((flags & FLAG_SLIPPERY) != 0) {
                 module.log("FLAG_SLIPPERY detected, removing it");
-                flags &= ~android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
+                flags &= ~FLAG_SLIPPERY;
                 callback.getArgs()[0] = flags;
             }
         }
