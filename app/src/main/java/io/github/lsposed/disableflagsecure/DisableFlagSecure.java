@@ -142,7 +142,7 @@ public class DisableFlagSecure extends XposedModule {
 
         // Remove FLAG_SLIPPERY for Android 12+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            removeFlagSlippery();
+            removeFlagSlippery(classLoader);
         }
     }
 
@@ -449,7 +449,29 @@ public class DisableFlagSecure extends XposedModule {
         }
     }
 
-    private void removeFlagSlippery() {
+    private void removeFlagSlippery(ClassLoader classLoader) {
+        try {
+            var windowManagerServiceClazz = classLoader.loadClass("com.android.server.wm.WindowManagerService");
+            var setFlagsMethod = windowManagerServiceClazz.getDeclaredMethod("setFlags", int.class, int.class);
+            hook(setFlagsMethod, RemoveFlagSlipperyHooker.class);
+        } catch (Throwable t) {
+            log("hook setFlags failed", t);
+        }
+    }
 
+    @XposedHooker
+    private static class RemoveFlagSlipperyHooker implements Hooker {
+
+        @BeforeInvocation
+        public static void before(@NonNull BeforeHookCallback callback) {
+            int flags = (int) callback.getArgs()[0];
+            int mask = (int) callback.getArgs()[1];
+
+            if ((flags & android.view.WindowManager.LayoutParams.FLAG_SLIPPERY) != 0) {
+                module.log("FLAG_SLIPPERY detected, removing it");
+                flags &= ~android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
+                callback.getArgs()[0] = flags;
+            }
+        }
     }
 }
