@@ -42,7 +42,7 @@ public class DisableFlagSecure extends XposedModule {
         super(base, param);
         LOGI("Module is init");
         module = this;
-
+    }
 
     @Override
     public void onSystemServerLoaded(@NonNull SystemServerLoadedParam param) {
