@@ -467,5 +467,5 @@ public class DisableFlagSecure extends XposedModule {
             callback.returnAndSkip(true);
         }
     }
-            }
-        
+    }
+            
