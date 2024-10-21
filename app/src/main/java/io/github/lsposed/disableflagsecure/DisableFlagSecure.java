@@ -143,6 +143,7 @@ public class DisableFlagSecure extends XposedModule {
 
         // Remove FLAG_SLIPPERY for Android 12+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            log("Try set hook...");
             hookIsSystemApplicationOverlay(classLoader);
         }
     }
@@ -464,6 +465,7 @@ public class DisableFlagSecure extends XposedModule {
     private static class IsSystemApplicationOverlayHooker implements Hooker {
         @BeforeInvocation
         public static void before(@NonNull BeforeHookCallback callback) {
+            log("Hooked");
             callback.returnAndSkip(true);
         }
     }
