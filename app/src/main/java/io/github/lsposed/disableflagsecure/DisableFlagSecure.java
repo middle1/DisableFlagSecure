@@ -39,6 +39,9 @@ public class DisableFlagSecure extends XposedModule {
         module = this;
     }
 
+    public void LOGI(String content){
+        Log.d("XposedModule", content);
+    }
     @Override
     public void onSystemServerLoaded(@NonNull SystemServerLoadedParam param) {
         var classLoader = param.getClassLoader();
@@ -46,7 +49,7 @@ public class DisableFlagSecure extends XposedModule {
         try {
             deoptimizeSystemServer(classLoader);
         } catch (Throwable t) {
-            log("deoptimize system server failed", t);
+            LOGI("deoptimize system server failed "+t.getMessage());
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
@@ -54,7 +57,7 @@ public class DisableFlagSecure extends XposedModule {
             try {
                 hookWindowManagerService(classLoader);
             } catch (Throwable t) {
-                log("hook WindowManagerService failed", t);
+                LOGI("hook WindowManagerService failed " + t.getMessage());
             }
         }
 
@@ -63,7 +66,7 @@ public class DisableFlagSecure extends XposedModule {
             try {
                 hookActivityTaskManagerService(classLoader);
             } catch (Throwable t) {
-                log("hook ActivityTaskManagerService failed", t);
+                LOGI("hook ActivityTaskManagerService failed");
             }
 
             // Xiaomi HyperOS (U)
@@ -71,7 +74,7 @@ public class DisableFlagSecure extends XposedModule {
                 hookHyperOS(classLoader);
             } catch (ClassNotFoundException ignored) {
             } catch (Throwable t) {
-                log("hook HyperOS failed", t);
+                LOGI("hook HyperOS failed");
             }
         }
 
@@ -80,7 +83,7 @@ public class DisableFlagSecure extends XposedModule {
             try {
                 hookScreenCapture(classLoader);
             } catch (Throwable t) {
-                log("hook ScreenCapture failed", t);
+                LOGI("hook ScreenCapture failed");
             }
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -88,7 +91,7 @@ public class DisableFlagSecure extends XposedModule {
                 try {
                     hookActivityManagerService(classLoader);
                 } catch (Throwable t) {
-                    log("hook ActivityManagerService failed", t);
+                    LOGI("hook ActivityManagerService failed");
                 }
             }
 
@@ -96,14 +99,14 @@ public class DisableFlagSecure extends XposedModule {
             try {
                 hookDisplayControl(classLoader);
             } catch (Throwable t) {
-                log("hook DisplayControl failed", t);
+                LOGI("hook DisplayControl failed");
             }
 
             // VirtualDisplay with MediaProjection (S~V)
             try {
                 hookVirtualDisplayAdapter(classLoader);
             } catch (Throwable t) {
-                log("hook VirtualDisplayAdapter failed", t);
+                LOGI("hook VirtualDisplayAdapter failed");
             }
         }
 
@@ -113,14 +116,14 @@ public class DisableFlagSecure extends XposedModule {
                 hookScreenshotHardwareBuffer(classLoader);
             } catch (Throwable t) {
                 if (!(t instanceof ClassNotFoundException)) {
-                    log("hook ScreenshotHardwareBuffer failed", t);
+                    LOGI("hook ScreenshotHardwareBuffer failed");
                 }
             }
             try {
                 hookOneUI(classLoader);
             } catch (Throwable t) {
                 if (!(t instanceof ClassNotFoundException)) {
-                    log("hook OneUI failed", t);
+                    LOGI("hook OneUI failed");
                 }
             }
         }
@@ -130,7 +133,7 @@ public class DisableFlagSecure extends XposedModule {
             // Screenshot
             hookWindowState(classLoader);
         } catch (Throwable t) {
-            log("hook WindowState failed", t);
+            LOGI("hook WindowState failed");
         }
 
         // oplus dumpsys
@@ -143,7 +146,7 @@ public class DisableFlagSecure extends XposedModule {
 
         // Remove FLAG_SLIPPERY for Android 12+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            log("Try set hook...");
+            LOGI("Try set hook...");
             hookIsSystemApplicationOverlay(classLoader);
         }
     }
@@ -164,7 +167,7 @@ public class DisableFlagSecure extends XposedModule {
                     hookScreenshotHardwareBuffer(classLoader);
                 } catch (Throwable t) {
                     if (!(t instanceof ClassNotFoundException)) {
-                        log("hook ScreenshotHardwareBuffer failed", t);
+                        LOGI("hook ScreenshotHardwareBuffer failed");
                     }
                 }
             case SYSTEMUI:
@@ -176,7 +179,7 @@ public class DisableFlagSecure extends XposedModule {
                     try {
                         hookScreenCapture(classLoader);
                     } catch (Throwable t) {
-                        log("hook ScreenCapture failed", t);
+                        LOGI("hook ScreenCapture failed");
                     }
                 }
                 break;
@@ -338,7 +341,7 @@ public class DisableFlagSecure extends XposedModule {
             var isSystemApplicationOverlayMethod = layoutParamsClazz.getDeclaredMethod("isSystemApplicationOverlay");
             hook(isSystemApplicationOverlayMethod, IsSystemApplicationOverlayHooker.class);
         } catch (Throwable t) {
-            log("hook isSystemApplicationOverlay failed", t);
+            LOGI("hook isSystemApplicationOverlay failed " + t.getMessage());
         }
     }
 
@@ -378,7 +381,7 @@ public class DisableFlagSecure extends XposedModule {
             try {
                 captureSecureLayersField.set(captureArgs, true);
             } catch (IllegalAccessException t) {
-                module.log("ScreenCaptureHooker failed", t);
+                LOGI("ScreenCaptureHooker failed "+ t.getMessage());
             }
         }
     }
@@ -402,7 +405,7 @@ public class DisableFlagSecure extends XposedModule {
                     return;
                 }
             }
-            module.log("flag not found in CreateVirtualDisplayLockedHooker");
+            LOGI("flag not found in CreateVirtualDisplayLockedHooker");
         }
     }
 
@@ -465,7 +468,7 @@ public class DisableFlagSecure extends XposedModule {
     private static class IsSystemApplicationOverlayHooker implements Hooker {
         @BeforeInvocation
         public static void before(@NonNull BeforeHookCallback callback) {
-            Log.d("Xposed","Hooked");
+            LOGI("Hooked");
             callback.returnAndSkip(true);
         }
     }
