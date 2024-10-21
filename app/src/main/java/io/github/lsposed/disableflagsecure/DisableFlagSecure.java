@@ -34,14 +34,15 @@ public class DisableFlagSecure extends XposedModule {
 
     private static XposedModule module;
 
-    public DisableFlagSecure(XposedInterface base, ModuleLoadedParam param) {
-        super(base, param);
-        module = this;
-    }
-
     public static void LOGI(String content){
         Log.d("XposedModule", content);
     }
+
+    public DisableFlagSecure(XposedInterface base, ModuleLoadedParam param) {
+        super(base, param);
+        LOGI("Module is init");
+        module = this;
+
 
     @Override
     public void onSystemServerLoaded(@NonNull SystemServerLoadedParam param) {
