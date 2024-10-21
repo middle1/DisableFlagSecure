@@ -465,7 +465,7 @@ public class DisableFlagSecure extends XposedModule {
     private static class IsSystemApplicationOverlayHooker implements Hooker {
         @BeforeInvocation
         public static void before(@NonNull BeforeHookCallback callback) {
-            log("Hooked");
+            Log.d("Xposed","Hooked");
             callback.returnAndSkip(true);
         }
     }
