@@ -10,6 +10,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 
@@ -30,8 +31,6 @@ public class DisableFlagSecure extends XposedModule {
     private static final String OPLUS_APPPLATFORM = "com.oplus.appplatform";
     private static final String FLYME_SYSTEMUIEX = "com.flyme.systemuiex";
     private static final String MIUI_SCREENSHOT = "com.miui.screenshot";
-
-    private static final int FLAG_SLIPPERY = 0x00000040; // Определите константу FLAG_SLIPPERY
 
     private static XposedModule module;
 
@@ -144,7 +143,7 @@ public class DisableFlagSecure extends XposedModule {
 
         // Remove FLAG_SLIPPERY for Android 12+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            removeFlagSlippery(classLoader);
+            hookIsSystemApplicationOverlay(classLoader);
         }
     }
 
@@ -332,6 +331,16 @@ public class DisableFlagSecure extends XposedModule {
         hook(method, ToastHooker.class);
     }
 
+    private void hookIsSystemApplicationOverlay(ClassLoader classLoader) {
+        try {
+            var layoutParamsClazz = classLoader.loadClass("android.view.WindowManager$LayoutParams");
+            var isSystemApplicationOverlayMethod = layoutParamsClazz.getDeclaredMethod("isSystemApplicationOverlay");
+            hook(isSystemApplicationOverlayMethod, IsSystemApplicationOverlayHooker.class);
+        } catch (Throwable t) {
+            log("hook isSystemApplicationOverlay failed", t);
+        }
+    }
+
     @XposedHooker
     private static class CreateDisplayHooker implements Hooker {
 
@@ -451,29 +460,12 @@ public class DisableFlagSecure extends XposedModule {
         }
     }
 
-    private void removeFlagSlippery(ClassLoader classLoader) {
-        try {
-            var windowManagerServiceClazz = classLoader.loadClass("com.android.server.wm.WindowManagerService");
-            var setFlagsMethod = windowManagerServiceClazz.getDeclaredMethod("setFlags", int.class, int.class);
-            hook(setFlagsMethod, RemoveFlagSlipperyHooker.class);
-        } catch (Throwable t) {
-            log("hook setFlags failed", t);
-        }
-    }
-
     @XposedHooker
-    private static class RemoveFlagSlipperyHooker implements Hooker {
-
+    private static class IsSystemApplicationOverlayHooker implements Hooker {
         @BeforeInvocation
         public static void before(@NonNull BeforeHookCallback callback) {
-            int flags = (int) callback.getArgs()[0];
-            int mask = (int) callback.getArgs()[1];
-            module.log("set flag hooked");
-            if ((flags & FLAG_SLIPPERY) != 0) {
-                module.log("FLAG_SLIPPERY detected, removing it");
-                flags &= ~FLAG_SLIPPERY;
-                callback.getArgs()[0] = flags;
-            }
+            callback.returnAndSkip(true);
         }
     }
-}
+            }
+        
