@@ -39,9 +39,10 @@ public class DisableFlagSecure extends XposedModule {
         module = this;
     }
 
-    public void LOGI(String content){
+    public static void LOGI(String content){
         Log.d("XposedModule", content);
     }
+
     @Override
     public void onSystemServerLoaded(@NonNull SystemServerLoadedParam param) {
         var classLoader = param.getClassLoader();
@@ -49,7 +50,7 @@ public class DisableFlagSecure extends XposedModule {
         try {
             deoptimizeSystemServer(classLoader);
         } catch (Throwable t) {
-            LOGI("deoptimize system server failed "+t.getMessage());
+            LOGI("deoptimize system server failed " + t.getMessage());
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
@@ -381,7 +382,7 @@ public class DisableFlagSecure extends XposedModule {
             try {
                 captureSecureLayersField.set(captureArgs, true);
             } catch (IllegalAccessException t) {
-                LOGI("ScreenCaptureHooker failed "+ t.getMessage());
+                LOGI("ScreenCaptureHooker failed " + t.getMessage());
             }
         }
     }
@@ -472,5 +473,4 @@ public class DisableFlagSecure extends XposedModule {
             callback.returnAndSkip(true);
         }
     }
-    }
-            
+}
